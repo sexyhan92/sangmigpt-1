@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>일부인 검사기</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f8f8;
+        }
+        .container, .upload-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .pass {
+            color: blue;
+        }
+        .fail {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>일부인 검사기</h1>
+        <label for="product">제품:</label>
+        <select id="product" onchange="calculateExpiration()">
+            <option value="">제품을 선택하세요</option>
+            <option value="6">참깨수제비</option>
+            <option value="7">사골곰탕수제비</option>  
+            <option value="18">누룽지국밥미역국(노브랜드)</option>
+            <option value="18">누룽지국밥북엇국(노브랜드)</option>
+            <option value="18">한솥사골계란국</option>          
+            <option value="18">한솥사골청양계란국</option>
+        </select><br>
+        <label for="date">제조 일자:</label>
+        <input type="date" id="date" onchange="calculateExpiration()"><br>
+        <p id="result">소비기한 자동 계산.</p>
+    </div>
+
+    <!-- 파일 업로드 결과를 표시할 div -->
+    <div id="uploadResult" style="text-align: center; margin-top: 20px;">
+        업로드 결과: 아직 데이터가 없습니다.
+    </div>
+
+    <div class="upload-container">
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" name="file" />
+            <input type="submit" value="업로드"/>
+        </form>
+    </div>
+
+    <div style="text-align: center; margin-top: 20px;">
+        <button id="reset">초기화</button>
+        <button id="save">저장</button>
+    </div>
+
+    <script>
+    function formatDate(date) {
+        return date.toISOString().split('T')[0].replace(/-/g, '.');
+    }
+
+    function calculateExpiration() {
+        var productLifeSpan = document.getElementById('product').value;
+        var manufacturingDate = document.getElementById('date').value;
+
+        if (productLifeSpan && manufacturingDate) {
+            var expirationDate = new Date(manufacturingDate);
+            expirationDate.setMonth(expirationDate.getMonth() + parseInt(productLifeSpan));
+            document.getElementById('result').innerText = '소비 기한: ' + formatDate(expirationDate);
+        } else {
+            document.getElementById('result').innerText = '소비기한 자동 계산.';
+        }
+    }
+
+    document.getElementById('reset').addEventListener('click', function() {
+        document.getElementById('product').value = '';
+        document.getElementById('date').value = '';
+        document.getElementById('result').innerText = '소비기한 자동 계산.';
+        document.getElementById('uploadResult').innerText = '업로드 결과: 아직 데이터가 없습니다.';
+    });
+
+    document.getElementById('uploadForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // 기본 폼 제출을 방지
+
+        var formData = new FormData(this);
+        
+        fetch('/uploader', {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => response.text()) // 서버 응답을 텍스트로 변환
+        .then(data => {
+            var uploadResult = document.getElementById('uploadResult');
+            var calculatedResult = document.getElementById('result').innerText.split(': ')[1];
+            var uploadDate = data.trim().split(' ')[0].replace(/-/g, '.'); // 업로드된 데이터에서 날짜 부분만 추출하고 '-'을 '.'로 변경
+
+            if (calculatedResult === uploadDate) {
+                uploadResult.innerHTML = '업로드 결과: ' + uploadDate + ' <span class="pass">합격</span>';
+            } else {
+                uploadResult.innerHTML = '업로드 결과: ' + uploadDate + ' <span class="fail">불합격</span>';
+            }
+        })
+        .catch(error => console.error('오류:', error));
+    });
+
+    document.getElementById('save').addEventListener('click', function() {
+        // 서버에 데이터를 저장하는 코드
+        alert('저장 기능은 서버 구현이 필요합니다.');
+    });
+    </script>
+</body>
+</html>
