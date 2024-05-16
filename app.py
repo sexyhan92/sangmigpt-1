@@ -14,7 +14,7 @@ client = vision.ImageAnnotatorClient(credentials=credentials)
 
 @app.route('/')
 def upload_file():
-   return render_template('upload.html')
+   return render_template('index.html')
 
 @app.route('/uploader', methods = ['GET', 'POST'])
 def upload_file_and_find_dates():
