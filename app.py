@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 # Google Cloud Vision API 설정
 credentials = service_account.Credentials.from_service_account_file(
-    r"C:/Users/Admin/Desktop/vs-code-421312-cb357167d131.json"  # 서비스 계정 키 파일 경로
+    r"C:\Users\Admin\Desktop\FLASK\vs-code-421312-cb357167d131.json"  # 서비스 계정 키 파일 경로
 )
 client = vision.ImageAnnotatorClient(credentials=credentials)
 
